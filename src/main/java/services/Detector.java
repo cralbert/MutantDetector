@@ -3,16 +3,63 @@ package services;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.amazonaws.util.StringUtils;
+
 public class Detector {
 
-	private static final Pattern dnaPatter = Pattern.compile("([ATCG])\\1{3}");
+	private static String DNA_SECUENSE = "ATCG";
+	private static Pattern dnaPatter = Pattern.compile("([ATCG])\\1{3}");
+	private static int CANT_SECUENSES_VALID = 2;
+	private static int CANT_DNA_REPETED = 3;
+	private static Detector instance;
+	
 	private int cantSecuensesValid;
 	
-	public Detector() {
-		cantSecuensesValid = 2;
+	public static final Detector instance() {
+		if (instance == null) {
+			instance = new Detector();
+		}
+		return instance;
+	}
+	
+	private Detector() {
+	}
+	
+	public String secuense() {
+		return DNA_SECUENSE;
+	}
+	
+	public Integer cant() {
+		return CANT_SECUENSES_VALID;
+	}
+	
+	public Integer repetitions() {
+		return CANT_DNA_REPETED + 1;
+	}
+	
+	public void defineDna(String dna) {
+		// TODO: valid that dna is alpha characters
+		if (!StringUtils.isNullOrEmpty(dna)) {
+			DNA_SECUENSE = dna;
+			dnaPatter = Pattern.compile("([" + DNA_SECUENSE + "])\\1{" + CANT_DNA_REPETED + "}");
+		}
+	}
+	
+	public void defineCantSecuense(int cant) {
+		if (cant > 0) {
+			CANT_SECUENSES_VALID = cant;
+		}
+	}
+	
+	public void defineDnaRepited(int cant) {
+		if (cant > 0) {
+			CANT_DNA_REPETED = cant - 1;
+			dnaPatter = Pattern.compile("([" + DNA_SECUENSE + "])\\1{" + CANT_DNA_REPETED + "}");
+		}
 	}
 	
 	public boolean isMutant(String[] adn) {
+		cantSecuensesValid = CANT_SECUENSES_VALID;
 		char[][] matrix = convertToMatrix(adn);
 		return horizontalEvaluation(matrix)
 				|| verticalEvaluation(matrix)
